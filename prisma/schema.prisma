@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  description String    @default("")
+  image       String    @default("https://i.sstatic.net/l60Hf.png&quot")
+  isDeleted   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  slug        String   @unique
+  price       Float    @default(0)
+  description String   @default("")
+  images      String[]
+  isDeleted   Boolean  @default(false)
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  inventory   Inventory?
+
+  @@map("products")
+}
+
+model Inventory {
+  id          Int      @id @default(autoincrement())
+  productId   Int      @unique
+  product     Product  @relation(fields: [productId], references: [id])
+  stock       Int      @default(0)
+  reserved    Int      @default(0)
+  soldCount   Int      @default(0)
+
+  @@map("inventories")
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  fullname  String
+  avatarUrl String   @default("https://i.imgur.com/ZANVnHE.jpeg")
+  status    Boolean  @default(true)
+  
+  roleId    Int
+  role      Role     @relation(fields: [roleId], references: [id])
+
+  loginCount Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String  @default("")
+
+  users       User[]
+}
+
+
